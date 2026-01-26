@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HEHIPEDS | Institutional Portal</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{ --dark:#002347; --orange:#ff4500; --gold:#ffd700; --bg:#f0f4f8; }
+body{ margin:0; font-family:sans-serif; background:var(--bg); color:var(--dark); }
+
+/* HEADER */
+header{ background:var(--dark); color:white; padding:30px 5%; text-align:center; border-bottom:5px solid var(--orange); }
+.logo-box{ width:80px; height:80px; border:2px dashed var(--gold); border-radius:50%; margin:0 auto 10px; display:flex; align-items:center; justify-content:center; }
+.school-name{ font-weight:bold; text-transform:uppercase; font-size:1.1rem; }
+
+.container{ max-width:800px; margin:auto; padding:20px; }
+.card{ background:white; padding:20px; border-radius:12px; margin-bottom:20px; box-shadow:0 4px 10px rgba(0,0,0,0.1); }
+
+/* DION AI */
+.dion-box{ background:#001a33; color:white; border-radius:15px; padding:15px; border:1px solid #00f2ff; }
+#dionChat{ height:80px; overflow:auto; font-size:13px; margin:10px 0; background:rgba(255,255,255,0.1); padding:8px; border-radius:5px; }
+
+/* INPUTS & BUTTONS */
+input, select{ width:100%; padding:12px; margin:8px 0; border-radius:8px; border:1px solid #ccc; box-sizing:border-box; }
+.btn{ background:var(--orange); color:white; border:none; padding:15px; border-radius:8px; font-weight:bold; cursor:pointer; width:100%; font-size:16px; }
+.btn-google{ background:white; color:#444; border:1px solid #ccc; display:flex; align-items:center; justify-content:center; gap:10px; margin-top:15px; }
+
+/* THEMES */
+.lecturer-theme{ border-top: 10px solid var(--orange); }
+.student-theme{ border-top: 10px solid #007bff; }
+.badge{ padding:4px 8px; border-radius:4px; font-size:11px; font-weight:bold; text-transform:uppercase; }
+
+/* OVERLAY FOR SIGN UP */
+.overlay{ display:none; position:fixed; inset:0; background:rgba(0,35,71,0.95); z-index:9999; padding:20px; overflow-y:auto; }
+
+footer{ background:#cbd5e1; padding:30px 5%; text-align:center; margin-top:40px; }
+</style>
+</head>
+<body>
+
+<header>
+    <div class="logo-box">LOGO</div>
+    <div class="school-name">Heritage Higher Institute of Peace and Development Studies (HEHIPEDS)</div>
+    <div style="color:var(--gold); font-size:12px; margin-top:5px;">Peace – Work – Progress | Springboard to Excellence</div>
+</header>
+
+<div class="container">
+
+    <div id="view-landing">
+        <div class="card" style="border-left:5px solid var(--orange);">
+            <h3>Proprietor's Message</h3>
+            <p>"We mean what we say and we say what we mean. Welcome to the HEHIPEDS digital gateway."</p>
+            <b>— Proprietor</b>
+        </div>
+        <div class="card" style="text-align:center;">
+            <h3>Academic Portal Access</h3>
+            <p>Sign in to manage your notes and join virtual classes.</p>
+            <button class="btn" onclick="openSignUp()">GET STARTED TO SIGN UP</button>
+        </div>
+    </div>
+
+    <div id="view-portal" style="display:none;">
+        <div class="card dion-box">
+            <b>DION AI | Hybrid Gemini</b>
+            <div id="dionChat">Portal active. How can I assist you today?</div>
+            <div style="display:flex; gap:5px;">
+                <input id="dionQ" placeholder="Ask DION..." style="margin:0; flex:1; color:black;">
+                <button onclick="askDion()" style="background:var(--orange); border:none; color:white; padding:0 15px; border-radius:5px;">ASK</button>
+            </div>
+        </div>
+
+        <div id="portalCard" class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2 id="dispName" style="margin:0;">User</h2>
+                <span id="dispBadge" class="badge"></span>
+            </div>
+            <p id="dispDept" style="font-weight:bold; color:var(--orange); margin-bottom:15px;"></p>
+            
+            <input style="width:100%; padding:12px; border-radius:8px; border:1px solid #ddd;" placeholder="🔍 Search departmental resources..." onkeyup="filter(this.value)">
+
+            <div id="tools-lecturer" style="display:none; margin-top:20px;">
+                <h4>📤 Faculty Upload</h4>
+                <input id="upTitle" placeholder="Title">
+                <input type="file" id="upFile">
+                <button class="btn" onclick="handleUpload()">SYNC TO PORTAL</button>
+                <button class="btn" style="background:#2e7d32; margin-top:10px;" onclick="vdo('init')">INITIATE ONLINE CLASS</button>
+            </div>
+
+            <div id="tools-student" style="display:none; margin-top:20px;">
+                <button class="btn" style="background:#1565c0;" onclick="vdo('join')">JOIN ONGOING CLASSROOM</button>
+            </div>
+
+            <h4 style="margin-top:30px; border-bottom:1px solid #eee; padding-bottom:5px;">📚 Resource Library</h4>
+            <div id="fileList">Loading...</div>
+        </div>
+        <button class="btn" style="background:#444;" onclick="logout()">Secure Logout</button>
+    </div>
+</div>
+
+<div class="overlay" id="signupOverlay">
+    <div class="card" style="max-width:400px; margin:10vh auto;">
+        <h3 style="margin-top:0;">Complete Your Identity</h3>
+        <p style="font-size:12px; color:#666;">Provide your details before authenticating with Google.</p>
+        
+        <label>Full Name</label>
+        <input id="inName" placeholder="e.g. Eliot">
+        
+        <label>Identity</label>
+        <select id="inRole">
+            <option value="Student">Student</option>
+            <option value="Lecturer">Lecturer</option>
+        </select>
+        
+        <label>Department</label>
+        <select id="inDept">
+            <option value="">-- Select --</option>
+            <option>Computer Engineering</option><option>Software Engineering</option>
+            <option>Nursing</option><option>Medical Laboratory Science</option>
+            <option>Accountancy</option><option>Banking and Finance</option>
+            <option>Journalism</option><option>Law and Political Science</option>
+        </select>
+        
+        <button class="btn btn-google" onclick="startAuth()">
+            <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" width="18"> Continue with Google
+        </button>
+        <button onclick="closeSignUp()" style="background:none; border:none; color:#999; width:100%; margin-top:15px; cursor:pointer;">Cancel</button>
+    </div>
+</div>
+
+<footer>
+    <div class="final-slogan" style="color:var(--orange); font-weight:bold; margin-bottom:15px;">"We mean what we say and we say what we mean."</div>
+    <div style="font-size:13px;">hehipeds@gmail.com | www.hehipeds.cm</div>
+</footer>
+
+<script>
+const S_URL='https://cajqytcvqrewrytupnul.supabase.co';
+const S_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhanF5dGN2cXRld3J5dHVwbnVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgxNTMwNjYsImV4cCI6MjA4MzcyOTA2Nn0.ylqZYBw3GQHRx-ohRZGyitahE5Jo3brEE7A9qK41GpY';
+const sb = supabase.createClient(S_URL, S_KEY);
+let user = null;
+
+function openSignUp() { signupOverlay.style.display = 'block'; }
+function closeSignUp() { signupOverlay.style.display = 'none'; }
+
+function startAuth() {
+    const n = inName.value; const r = inRole.value; const d = inDept.value;
+    if(!n || !d) return alert("Please fill all fields!");
+    localStorage.setItem('hehipeds_temp', JSON.stringify({name:n, role:r, dept:d}));
+    sb.auth.signInWithOAuth({ provider:'google', options:{ redirectTo:window.location.href } });
+}
+
+sb.auth.onAuthStateChange(async (e, session) => {
+    if (session) {
+        const { data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
+        if (profile) { renderPortal(profile); } 
+        else {
+            const temp = JSON.parse(localStorage.getItem('hehipeds_temp'));
+            if (temp) {
+                const newP = { id: session.user.id, full_name: temp.name, role: temp.role, department: temp.dept, email: session.user.email };
+                await sb.from('profiles').upsert(newP);
+                localStorage.removeItem('hehipeds_temp');
+                renderPortal(newP);
+            } else { openSignUp(); }
+        }
+    }
+});
+
+function renderPortal(p) {
+    user = p;
+    viewLanding.style.display = 'none';
+    signupOverlay.style.display = 'none';
+    viewPortal.style.display = 'block';
+    dispName.innerText = p.full_name;
+    dispDept.innerText = p.department;
+    dispBadge.innerText = p.role;
+    
+    if (p.role === 'Lecturer') {
+        portalCard.className = "card lecturer-theme";
+        toolsLecturer.style.display = 'block';
+        dispBadge.style.background = "#ffede6"; dispBadge.style.color = "#ff4500";
+    } else {
+        portalCard.className = "card student-theme";
+        toolsStudent.style.display = 'block';
+        dispBadge.style.background = "#e3f2fd"; dispBadge.style.color = "#1565c0";
+    }
+    loadFiles();
+}
+
+async function handleUpload() {
+    const f = upFile.files[0]; const t = upTitle.value;
+    if(!f || !t) return alert("Select a file and title.");
+    const path = `${user.department}/${Date.now()}_${f.name}`;
+    await sb.storage.from('hehipeds-files').upload(path, f);
+    const { data } = sb.storage.from('hehipeds-files').getPublicUrl(path);
+    await sb.from('Document').insert([{ Title: t, file_url: data.publicUrl, Department: user.department }]);
+    alert("Resource Synced!"); loadFiles();
+}
+
+async function loadFiles() {
+    const { data } = await sb.from('Document').select('*').ilike('Department', `%${user.department}%`);
+    fileList.innerHTML = data.map(d => `<div class="f-row" style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;">
+        <span>${d.Title}</span><a href="${d.file_url}" target="_blank" style="color:var(--orange); font-weight:bold; text-decoration:none;">OPEN</a>
+    </div>`).join('') || "No resources found.";
+}
+
+function vdo(mode) {
+    const room = user.department.replace(/\s/g,'');
+    window.open(mode === 'init' ? `https://vdo.ninja/?room=${room}` : `https://vdo.ninja/?room=${room}&view`, '_blank');
+}
+
+function askDion() {
+    const q = dionQ.value.toLowerCase();
+    let res = "I am processing your request for " + user.department;
+    if(q.includes("class")) res = "Please use the classroom buttons below to begin.";
+    dionChat.innerHTML += `<br><b>You:</b> ${q}<br><b>DION:</b> ${res}`;
+    dionQ.value = "";
+}
+
+function logout() { sb.auth.signOut(); location.reload(); }
+</script>
+</body>
+                  </html>
+  
