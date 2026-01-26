@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HEHIPEDS | Heritage Higher Institute of Peace and Development Studies</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+  --dark:#002347;
+  --orange:#ff4500;
+  --bg:#f0f4f8;
+  --white:#ffffff;
+}
+body{
+  margin:0;
+  font-family:Inter,system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--dark);
+}
+header{
+  background:var(--dark);
+  color:white;
+  padding:30px 5%;
+  text-align:center;
+}
+.logo-holder{
+  width:120px;height:120px;
+  border:3px dashed var(--orange);
+  border-radius:50%;
+  margin:0 auto 15px;
+  display:flex;align-items:center;justify-content:center;
+}
+.school-title{
+  font-weight:900;
+  text-transform:uppercase;
+}
+.motto{color:var(--orange);font-weight:bold;}
+.slogan{font-style:italic;font-size:.9rem;}
+.container{max-width:900px;margin:auto;padding:20px;}
+.card{
+  background:white;
+  padding:25px;
+  border-radius:15px;
+  margin-bottom:25px;
+  box-shadow:0 5px 20px rgba(0,0,0,.05);
+}
+.btn{
+  background:var(--orange);
+  color:white;
+  border:none;
+  padding:15px;
+  border-radius:10px;
+  font-weight:bold;
+  cursor:pointer;
+  width:100%;
+}
+.search{
+  width:100%;
+  padding:15px;
+  border-radius:10px;
+  border:2px solid #ccc;
+  font-size:16px;
+}
+.search:focus{border-color:var(--orange);outline:none;}
+.file{
+  display:flex;
+  justify-content:space-between;
+  border-bottom:1px solid #eee;
+  padding:10px 0;
+}
+.dion{
+  background:#001a33;
+  color:white;
+  border-radius:15px;
+  padding:15px;
+  border:1px solid var(--orange);
+}
+#dionChat{
+  height:120px;
+  overflow:auto;
+  background:rgba(0,0,0,.3);
+  padding:10px;
+  border-radius:8px;
+  font-size:13px;
+  margin-bottom:10px;
+}
+.overlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(255,255,255,.97);
+  z-index:9999;
+  padding:20px;
+}
+input,select{
+  width:100%;
+  padding:12px;
+  margin:8px 0;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
+footer{
+  background:#e2e8f0;
+  padding:40px 5%;
+}
+footer a{
+  display:block;
+  color:var(--dark);
+  font-weight:600;
+  text-decoration:none;
+  margin:10px 0;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo-holder">LOGO</div>
+  <div class="school-title">
+    Heritage Higher Institute of Peace and Development Studies (HEHIPEDS)
+  </div>
+  <div class="motto">Peace – Work – Progress</div>
+  <div class="slogan">Springboard to Excellence</div>
+</header>
+
+<div class="container">
+
+<div id="landing">
+  <div class="card">
+    <h3>Proprietor’s Message</h3>
+    <p>
+      HEHIPEDS is a sanctuary of learning where peace, work and progress shape professional excellence.
+    </p>
+    <b>— Proprietor Name</b>
+  </div>
+
+  <div class="card" style="text-align:center;">
+    <h3>Campus Digital Portal</h3>
+    <button class="btn" onclick="googleSign()">Get Started with Google</button>
+  </div>
+</div>
+
+<div id="portal" style="display:none;">
+
+  <div class="card dion">
+    <b>DION AI</b> <small id="dionMode">(Text)</small>
+    <div id="dionChat">
+      Welcome to HEHIPEDS. Ask me about notes, uploads, or classes.
+    </div>
+    <div style="display:flex;gap:5px;">
+      <input id="dionQ" placeholder="Ask DION…">
+      <button onclick="askDion()">Send</button>
+      <button onclick="toggleVoice()">🔊</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 id="userName"></h2>
+    <div id="userDept" style="color:var(--orange);font-weight:bold;"></div>
+
+    <input class="search" placeholder="Search documents…" onkeyup="filterFiles(this.value)">
+
+    <div id="lecturerZone" style="display:none;">
+      <h4>Upload Course Materials</h4>
+      <input id="fileTitle" placeholder="Title">
+      <input type="file" id="fileIn">
+      <button class="btn" onclick="uploadFile()">Upload</button>
+    </div>
+
+    <h4 style="margin-top:25px;">Departmental Library</h4>
+    <div id="library"></div>
+  </div>
+
+  <div class="card">
+    <h4>Portal Updates</h4>
+    <small>Semester registration is ongoing.</small>
+  </div>
+
+  <button class="btn" style="background:#444;" onclick="logout()">Logout</button>
+</div>
+</div>
+
+<footer>
+  <a href="mailto:hehipeds@gmail.com">📧 hehipeds@gmail.com</a>
+  <a href="https://facebook.com/Heritageforpeace" target="_blank">Facebook: Heritageforpeace</a>
+  <a href="https://www.hehipeds.cm" target="_blank">www.hehipeds.cm</a>
+  <p>📞 +237 XXX XXX XXX</p>
+  <b style="color:var(--orange);text-align:center;display:block;">
+    “We mean what we say and we say what we mean.”
+  </b>
+</footer>
+
+<div class="overlay" id="profileBox">
+  <div class="card" style="max-width:400px;margin:10vh auto;">
+    <h3>Complete Registration</h3>
+    <input id="fullName" placeholder="Full Name">
+    <select id="role">
+      <option>Student</option>
+      <option>Lecturer</option>
+    </select>
+    <select id="dept">
+      <option>Computer Engineering</option>
+      <option>Software Engineering</option>
+      <option>Nursing</option>
+      <option>Medical Laboratory Science</option>
+      <option>Accountancy</option>
+      <option>Human Resource Management</option>
+      <option>Banking and Finance</option>
+      <option>Journalism and Mass Communication</option>
+      <option>Law and Political Science</option>
+    </select>
+    <button class="btn" onclick="saveProfile()">Enter Portal</button>
+  </div>
+</div>
+
+<script>
+/* === YOUR ORIGINAL SUPABASE KEYS (UNCHANGED) === */
+const S_URL='https://cajqytcvqrewrytupnul.supabase.co';
+const S_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhanF5dGN2cXJld3J5dHVwbnVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgxNTMwNjYsImV4cCI6MjA4MzcyOTA2Nn0.ylqZYBw3GQHRx-ohRZGyitahE5Jo3brEE7A9qK41GpY';
+const sb=supabase.createClient(S_URL,S_KEY);
+
+let userProfile=null;
+let voice=false;
+
+/* GOOGLE SIGN IN */
+function googleSign(){
+  sb.auth.signInWithOAuth({
+    provider:'google',
+    options:{redirectTo:location.origin}
+  });
+}
+
+/* AUTH STATE */
+sb.auth.onAuthStateChange(async(e,s)=>{
+  if(!s) return;
+  const {data}=await sb.from('profiles').select('*').eq('id',s.user.id).single();
+  if(data){
+    loadPortal(data);
+  }else{
+    profileBox.style.display='block';
+  }
+});
+
+/* PROFILE */
+async function saveProfile(){
+  const {data:{user}}=await sb.auth.getUser();
+  const p={
+    id:user.id,
+    full_name:fullName.value,
+    role:role.value,
+    department:dept.value,
+    email:user.email
+  };
+  if(!p.full_name) return alert("Full name required");
+  await sb.from('profiles').upsert(p);
+  location.reload();
+}
+
+/* PORTAL */
+function loadPortal(p){
+  userProfile=p;
+  landing.style.display='none';
+  profileBox.style.display='none';
+  portal.style.display='block';
+  userName.innerText="Hello, "+p.full_name;
+  userDept.innerText=p.department;
+  if(p.role==='Lecturer') lecturerZone.style.display='block';
+  loadFiles();
+}
+
+/* FILES */
+async function uploadFile(){
+  const f=fileIn.files[0];
+  if(!f||!fileTitle.value) return alert("Missing data");
+  const path=`${userProfile.department}/${Date.now()}_${f.name}`;
+  await sb.storage.from('hehipeds-files').upload(path,f);
+  const {data:u}=sb.storage.from('hehipeds-files').getPublicUrl(path);
+  await sb.from('Document').insert([
+    {Title:fileTitle.value,file_url:u.publicUrl,Department:userProfile.department}
+  ]);
+  loadFiles();
+}
+
+async function loadFiles(){
+  const {data}=await sb.from('Document')
+    .select('*')
+    .ilike('Department',`%${userProfile.department}%`);
+  library.innerHTML='';
+  data.forEach(d=>{
+    library.innerHTML+=`
+      <div class="file">
+        <span>${d.Title}</span>
+        <a href="${d.file_url}" target="_blank">OPEN</a>
+      </div>`;
+  });
+}
+
+function filterFiles(t){
+  document.querySelectorAll('.file').forEach(f=>{
+    f.style.display=f.innerText.toLowerCase().includes(t.toLowerCase())
+      ?'flex':'none';
+  });
+}
+
+/* DION AI (SMART ROUTER) */
+function askDion(){
+  const q=dionQ.value.toLowerCase();
+  let a="Use the search bar to find departmental documents.";
+  if(q.includes('upload')) a="Lecturers can upload materials in the upload section.";
+  if(q.includes('class')) a="Use the class button provided by your lecturer.";
+  if(q.includes('help')) a="I can guide you on notes, uploads, and classes.";
+  dionChat.innerHTML+=`<br><b>You:</b> ${q}<br><b>DION:</b> ${a}`;
+  if(voice) speechSynthesis.speak(new SpeechSynthesisUtterance(a));
+  dionQ.value='';
+}
+function toggleVoice(){
+  voice=!voice;
+  dionMode.innerText=voice?'(Voice)':'(Text)';
+}
+
+/* LOGOUT */
+function logout(){
+  sb.auth.signOut();
+  location.reload();
+}
+</script>
+
+</body>
+  </html>
