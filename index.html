@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HEHIPEDS | Institutional Portal</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root { --dark: #002347; --orange: #ff4500; --gold: #ffd700; --bg: #f0f4f8; --white: #ffffff; --student-blue: #0056b3; }
+        body { margin: 0; font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--dark); }
+
+        /* HEADER */
+        header { background: var(--dark); color: white; padding: 30px 5%; text-align: center; border-bottom: 5px solid var(--orange); }
+        .logo-placeholder { width: 90px; height: 90px; border: 2px dashed var(--gold); border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.1); }
+        .school-name { font-weight: 800; text-transform: uppercase; font-size: 1.2rem; line-height: 1.3; }
+        .motto { color: var(--gold); font-weight: bold; margin-top: 8px; display: block; font-size: 0.9rem; }
+
+        .container { max-width: 850px; margin: auto; padding: 20px; }
+        .card { background: var(--white); border-radius: 15px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+
+        /* DION AI - MINI GEMINI */
+        .dion-box { background: #001a33; color: white; border-radius: 15px; padding: 20px; border: 1px solid #00f2ff; }
+        .dion-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+        .dion-orb { width: 45px; height: 45px; background: radial-gradient(circle, #00f2ff, #002347); border-radius: 50%; cursor: pointer; box-shadow: 0 0 10px #00f2ff; }
+        #dion-display { height: 90px; overflow-y: auto; font-size: 13px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; border: 1px solid #1a3a5a; }
+
+        /* BUTTONS & INPUTS */
+        .btn { background: var(--orange); color: white; border: none; padding: 15px; border-radius: 10px; font-weight: bold; width: 100%; cursor: pointer; font-size: 16px; margin-top: 10px; transition: 0.3s; }
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-google { background: white; color: #444; border: 1px solid #ccc; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        input, select { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 15px; }
+        .universal-search { border: 2px solid var(--orange); font-weight: bold; }
+
+        /* PORTAL THEMES */
+        .portal-lecturer { border-top: 10px solid var(--orange); }
+        .portal-student { border-top: 10px solid var(--student-blue); }
+        .role-tag { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; text-transform: uppercase; }
+
+        /* OVERLAYS */
+        .full-overlay { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 1000; padding: 20px; overflow-y: auto; }
+
+        footer { background: #e2e8f0; padding: 40px 5%; text-align: center; border-top: 2px solid #cbd5e1; }
+        .footer-links a { display: block; color: var(--dark); margin: 10px 0; font-weight: 600; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo-placeholder">LOGO</div>
+    <div class="school-name">Heritage Higher Institute of Peace and Development Studies (HEHIPEDS)</div>
+    <span class="motto">Peace - Work - Progress | Springboard to Excellence</span>
+</header>
+
+<div class="container">
+    <div id="view-landing">
+        <div class="card">
+            <h3>Proprietor's Message</h3>
+            <p>"We mean what we say and we say what we mean. Education is the springboard to excellence."</p>
+            <b>- Proprietor</b>
+        </div>
+        <button class="btn" onclick="showSignup()">GET STARTED TO SIGN UP</button>
+    </div>
+
+    <div id="view-portal" style="display:none;">
+        <div class="dion-box">
+            <div class="dion-header">
+                <div class="dion-orb" onclick="toggleDionVoice()"></div>
+                <b>DION AI | Mini Gemini</b>
+            </div>
+            <div id="dion-display">Welcome. Your departmental resources are synced and ready.</div>
+            <div style="display:flex; gap:5px; margin-top:10px;">
+                <input type="text" id="dion-input" placeholder="Ask DION..." style="margin:0; flex:1;">
+                <button onclick="askDion()" style="background:var(--orange); border:none; color:white; padding:0 15px; border-radius:10px;">OK</button>
+            </div>
+        </div>
+
+        <div id="main-portal-card" class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <h2 id="user-display-name" style="margin:0;">User</h2>
+                <span id="user-role-tag" class="role-tag"></span>
+            </div>
+            <p id="user-dept-display" style="font-weight:bold; color:var(--orange); margin-bottom:20px;"></p>
+
+            <input type="text" class="universal-search" placeholder="🔍 Universal Search: Find any document, video or note..." onkeyup="universalFilter(this.value)">
+
+            <div id="lecturer-tools" style="display:none; margin-top:25px; padding:20px; background:#fff5f2; border-radius:12px; border:1px solid #ffd8cc;">
+                <h4 style="margin-top:0;">📤 Faculty Upload Portal</h4>
+                <input type="text" id="upload-title" placeholder="Document Title">
+                <input type="file" id="upload-file">
+                <button class="btn" onclick="handleUpload()">SYNC TO PORTAL</button>
+                <button class="btn" style="background:#28a745; margin-top:15px;" onclick="startClass()">INITIATE ONLINE CLASSROOM</button>
+            </div>
+
+            <div id="student-tools" style="display:none; margin-top:25px;">
+                <button class="btn" style="background:var(--student-blue);" onclick="joinClass()">JOIN ONGOING CLASSROOM</button>
+            </div>
+
+            <h4 style="margin-top:40px; border-bottom:2px solid #eee; padding-bottom:10px;">📚 Resource Library</h4>
+            <div id="library-list">Loading library...</div>
+        </div>
+        <button class="btn" style="background:#555;" onclick="logout()">Logout</button>
+    </div>
+</div>
+
+<div id="signup-window" class="full-overlay">
+    <div class="card" style="max-width:450px; margin:20px auto;">
+        <h2 style="text-align:center;">Create Your Identity</h2>
+        <p style="text-align:center; font-size:14px; color:#666;">Provide your credentials to access your personalized portal.</p>
+        
+        <label>Full Name</label>
+        <input type="text" id="reg-name" placeholder="Enter Full Name">
+        
+        <label>Your Role</label>
+        <select id="reg-role">
+            <option value="Student">Student Identity</option>
+            <option value="Lecturer">Lecturer Identity</option>
+        </select>
+        
+        <label>Department</label>
+        <select id="reg-dept">
+            <option value="">-- Select Department --</option>
+            <option>Software Engineering</option><option>Computer Engineering</option>
+            <option>Nursing</option><option>Medical Laboratory Science</option>
+            <option>Accountancy</option><option>Banking and Finance</option>
+            <option>Management & HR</option><option>Journalism</option>
+        </select>
+
+        <button class="btn btn-google" onclick="processGoogleLogin()">
+            <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" width="20"> CONTINUE WITH GOOGLE
+        </button>
+        <button onclick="hideSignup()" style="background:none; border:none; width:100%; margin-top:15px; color:#999; cursor:pointer;">Cancel</button>
+    </div>
+</div>
+
+<footer>
+    <button class="btn" style="background:var(--gold); color:black; max-width:300px; margin-bottom:25px;">STAFF & SUCCESS STORIES</button>
+    <div class="footer-links">
+        <a href="mailto:hehipeds@gmail.com">hehipeds@gmail.com</a>
+        <a href="https://facebook.com/Heritageforpeace" target="_blank">Facebook: Heritageforpeace</a>
+        <a href="https://www.hehipeds.cm" target="_blank">www.hehipeds.cm</a>
+    </div>
+    <p><b>"We mean what we say and we say what we mean."</b></p>
+</footer>
+
+<script>
+const S_URL = 'https://cajqytcvqrewrytupnul.supabase.co';
+const S_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhanF5dGN2cXJld3J5dHVwbnVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgxNTMwNjYsImV4cCI6MjA4MzcyOTA2Nn0.ylqZYBw3GQHRx-ohRZGyitahE5Jo3brEE7A9qK41GpY';
+const sb = supabase.createClient(S_URL, S_KEY);
+let currentUser = null;
+let voiceEnabled = false;
+
+function showSignup() { document.getElementById('signup-window').style.display = 'block'; }
+function hideSignup() { document.getElementById('signup-window').style.display = 'none'; }
+
+async function processGoogleLogin() {
+    const n = document.getElementById('reg-name').value;
+    const r = document.getElementById('reg-role').value;
+    const d = document.getElementById('reg-dept').value;
+    if(!n || !d) return alert("Please fill in your Name and Department!");
+    
+    localStorage.setItem('pending_profile', JSON.stringify({name:n, role:r, dept:d}));
+    await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } });
+}
+
+sb.auth.onAuthStateChange(async (event, session) => {
+    if (session) {
+        const { data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
+        if (profile) {
+            initPortal(profile);
+        } else {
+            const pending = JSON.parse(localStorage.getItem('pending_profile'));
+            if (pending) {
+                const newP = { id: session.user.id, full_name: pending.name, role: pending.role, department: pending.dept, email: session.user.email };
+                await sb.from('profiles').upsert(newP);
+                localStorage.removeItem('pending_profile');
+                initPortal(newP);
+            } else { showSignup(); }
+        }
+    }
+});
+
+function initPortal(p) {
+    currentUser = p;
+    document.getElementById('view-landing').style.display = 'none';
+    document.getElementById('signup-window').style.display = 'none';
+    document.getElementById('view-portal').style.display = 'block';
+    document.getElementById('user-display-name').innerText = p.full_name;
+    document.getElementById('user-dept-display').innerText = p.department.toUpperCase();
+    
+    const roleTag = document.getElementById('user-role-tag');
+    const portalCard = document.getElementById('main-portal-card');
+    roleTag.innerText = p.role;
+    
+    if (p.role === 'Lecturer') {
+        portalCard.className = "card portal-lecturer";
+        roleTag.style.background = "#fff5f2"; roleTag.style.color = "var(--orange)";
+        document.getElementById('lecturer-tools').style.display = 'block';
+    } else {
+        portalCard.className = "card portal-student";
+        roleTag.style.background = "#eef6ff"; roleTag.style.color = "var(--student-blue)";
+        document.getElementById('student-tools').style.display = 'block';
+    }
+    loadLibrary();
+}
+
+async function handleUpload() {
+    const f = document.getElementById('upload-file').files[0];
+    const t = document.getElementById('upload-title').value;
+    if(!f || !t) return alert("Select a file and enter a title.");
+    
+    const path = `${currentUser.department}/${Date.now()}_${f.name}`;
+    await sb.storage.from('hehipeds-files').upload(path, f);
+    const { data: urlData } = sb.storage.from('hehipeds-files').getPublicUrl(path);
+    
+    await sb.from('Document').insert([{ Title: t, file_url: urlData.publicUrl, Department: currentUser.department }]);
+    alert("Resource Synced Successfully!");
+    loadLibrary();
+}
+
+async function loadLibrary() {
+    const { data } = await sb.from('Document').select('*').ilike('Department', `%${currentUser.department}%`);
+    const list = document.getElementById('library-list');
+    list.innerHTML = data.map(doc => `
+        <div class="file-item" style="display:flex; justify-content:space-between; align-items:center; padding:12px; border-bottom:1px solid #eee;">
+            <span style="font-weight:500;">${doc.Title}</span>
+            <a href="${doc.file_url}" target="_blank" style="color:var(--orange); font-weight:bold; text-decoration:none; border:1px solid var(--orange); padding:5px 10px; border-radius:5px; font-size:12px;">DOWNLOAD</a>
+        </div>
+    `).join('') || "No resources found for your department.";
+}
+
+function universalFilter(val) {
+    const term = val.toLowerCase();
+    document.querySelectorAll('.file-item').forEach(item => {
+        item.style.display = item.innerText.toLowerCase().includes(term) ? 'flex' : 'none';
+    });
+}
+
+function startClass() { window.open(`https://vdo.ninja/?room=${currentUser.department.replace(/\s/g,'')}`, '_blank'); }
+function joinClass() { window.open(`https://vdo.ninja/?room=${currentUser.department.replace(/\s/g,'')}&view`, '_blank'); }
+
+function askDion() {
+    const q = document.getElementById('dion-input').value.toLowerCase();
+    let reply = "Processing request for " + currentUser.department;
+    if(q.includes("class")) reply = "Use the green/blue classroom buttons below to start or join your session.";
+    document.getElementById('dion-display').innerText = "DION: " + reply;
+    if(voiceEnabled) window.speechSynthesis.speak(new SpeechSynthesisUtterance(reply));
+    document.getElementById('dion-input').value = "";
+}
+
+function toggleDionVoice() { voiceEnabled = !voiceEnabled; alert("Voice: " + (voiceEnabled ? "ON" : "OFF")); }
+function logout() { sb.auth.signOut(); location.reload(); }
+</script>
+</body>
+                  </html>
+          
