@@ -1,0 +1,42 @@
+/* MINETOPIA OS KERNEL v2.1 - "GENESIS"
+   Architect: Eliot | GitHub Optimized
+*/
+
+const Kernel = {
+    state: JSON.parse(localStorage.getItem('minetopia_state')) || {
+        theme: 'dark',
+        brightness: 85,
+        flashlight: false,
+        cellular: true,
+        installedApps: [
+            { id: 'playstore', name: 'Play Store', icon: '🛍️', url: 'playstore.html' }
+        ],
+        devMode: true
+    },
+
+    save() {
+        localStorage.setItem('minetopia_state', JSON.stringify(this.state));
+    },
+
+    hardware: {
+        setBrightness(val) {
+            Kernel.state.brightness = val;
+            // Apply brightness globally to the document
+            document.documentElement.style.filter = `brightness(${val}%)`;
+            Kernel.save();
+        },
+        toggleFlashlight() {
+            Kernel.state.flashlight = !Kernel.state.flashlight;
+            Kernel.save();
+        }
+    },
+
+    // Navigation helper to handle the GitHub .bcs requirement
+    navigate(target) {
+        window.location.href = target === 'control' ? 'control.bcs.html' : `${target}.html`;
+    }
+};
+
+window.addEventListener('DOMContentLoaded', () => {
+    Kernel.hardware.setBrightness(Kernel.state.brightness);
+});
