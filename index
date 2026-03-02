@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minetopia OS</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;900&display=swap">
+    <style>
+        :root { --m-blue: #007aff; }
+        body { 
+            margin: 0; background: #000; color: #fff; font-family: 'Inter', sans-serif;
+            height: 100vh; overflow: hidden; display: flex; flex-direction: column;
+        }
+        
+        /* THE M LOGO & SLOGAN */
+        .hero {
+            text-align: center; margin-top: 10vh;
+        }
+        .m-logo {
+            font-size: 120px; font-weight: 900; margin: 0;
+            background: linear-gradient(#fff, #444);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .slogan {
+            letter-spacing: 5px; font-size: 10px; opacity: 0.6; margin-top: -10px;
+        }
+
+        /* DUAL CLOCK SYSTEM */
+        .clock-container {
+            display: flex; justify-content: center; gap: 40px; margin-top: 50px;
+        }
+        .analog-clock {
+            width: 120px; height: 120px; border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 50%; position: relative;
+        }
+        .hand { position: absolute; bottom: 50%; left: 50%; transform-origin: bottom; background: #fff; }
+        .digital-clock { font-size: 40px; font-weight: 300; align-self: center; }
+
+        /* TAB NAVIGATION (Multi-page) */
+        #dock {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px);
+            padding: 15px 30px; border-radius: 40px; border: 1px solid rgba(255,255,255,0.1);
+            display: flex; gap: 30px;
+        }
+        .dock-item { text-decoration: none; font-size: 24px; transition: 0.3s; }
+        .dock-item:hover { transform: scale(1.2); }
+    </style>
+</head>
+<body>
+
+    <div class="hero">
+        <h1 class="m-logo">M</h1>
+        <div class="slogan">MINETOPIA: OWN YOUR FUTURE</div>
+        <div id="current-date" style="margin-top: 20px; font-weight: 700; color: var(--m-blue);">MARCH 02, 2026</div>
+    </div>
+
+    <div class="clock-container">
+        <div class="analog-clock">
+            <div class="hand" id="hr" style="width: 4px; height: 30px;"></div>
+            <div class="hand" id="mn" style="width: 2px; height: 45px;"></div>
+        </div>
+        <div class="digital-clock" id="digi">12:00</div>
+    </div>
+
+    <nav id="dock">
+        <a href="foneai.html" class="dock-item">🧠</a> <a href="control.html" class="dock-item">⚙️</a>
+        <a href="index.html" class="dock-item">🏠</a>
+        <a href="apps.html" class="dock-item">🔳</a>
+    </nav>
+<script src="kernel.js"></script>
+<script>
+    function systemTimeSync() {
+        const now = new Date();
+        
+        // 1. Digital Clock (24-hour format)
+        const h = now.getHours().toString().padStart(2, '0');
+        const m = now.getMinutes().toString().padStart(2, '0');
+        const s = now.getSeconds().toString().padStart(2, '0');
+        
+        const digiDisplay = document.getElementById('digi');
+        if (digiDisplay) digiDisplay.innerText = `${h}:${m}`;
+
+        // 2. Analog Hands (Degrees Calculation)
+        // $ \text{Degrees} = (\text{Hours} \times 30) + (\text{Minutes} \times 0.5) $
+        const hrHand = document.getElementById('hr');
+        const mnHand = document.getElementById('mn');
+        
+        if (hrHand) hrHand.style.transform = `rotate(${(now.getHours() % 12) * 30 + now.getMinutes() * 0.5}deg)`;
+        if (mnHand) mnHand.style.transform = `rotate(${now.getMinutes() * 6}deg)`;
+
+        // 3. Date Display (MARCH 02, 2026)
+        const dateDisplay = document.getElementById('current-date');
+        if (dateDisplay) {
+            const options = { month: 'long', day: '2-digit', year: 'numeric' };
+            dateDisplay.innerText = now.toLocaleDateString('en-US', options).toUpperCase();
+        }
+    }
+
+    // Start the heartbeat immediately
+    window.onload = () => {
+        // Run every 1000ms (1 second) to keep the "Brain" accurate
+        setInterval(systemTimeSync, 1000);
+        systemTimeSync();
+        console.log("Clock Engine Synchronized with Kernel.");
+    };
+</script>
+</body>
+</html>
